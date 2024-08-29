@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Welcome to TINET</h1>
+            <p>A set of calculator services that respect your privacy.</p>
+            <a href="{% url 'register' %}" class="btn">Get Started</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

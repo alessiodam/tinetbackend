@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>{{ leaderboard.title }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/leaderboard_detail.css' %}">
+</head>
+<body>
+    {% include 'components/navbar.html' %}
+    <h1 class="custom-leaderboard-title">{{ leaderboard.title }}</h1>
+    <p class="custom-leaderboard-description">{{ leaderboard.description }}</p>
+    <ol class="custom-leaderboard-list">
+        {% for entry in leaderboard.entries %}
+            <li class="custom-leaderboard-entry">{{ entry.user.username }} - Score: {{ entry.score }}</li>
+        {% endfor %}
+    </ol>
+    <a href="{% url 'leaderboards' %}" class="custom-leaderboard-link">Back to Leaderboards</a>
+</body>
+</html>

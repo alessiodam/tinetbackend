@@ -1,0 +1,11 @@
+[Unit]
+Description=TINET Backend Django production server
+
+[Service]
+Restart=on-failure
+WorkingDirectory=/home/ubuntu/tinetbackend
+ExecStart=/bin/bash entrypoint.sh
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target

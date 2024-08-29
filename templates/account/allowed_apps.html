@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Manage App Access - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account/allowed_apps.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="container">
+    <h1>Manage App Access</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2>Apps you allowed access to</h2>
+            {% if allowed_apps %}
+                <ul>
+                    {% for allowed_app in allowed_apps %}
+                        <li class="allowed-app-item">
+                            {{ allowed_app.app.name }}
+                            <button class="expand-btn">Show Info</button>
+                            <div class="allowed-app-info">
+                                <strong>Name:</strong> {{ allowed_app.app.name }}<br>
+                                <strong>Description:</strong> {{ allowed_app.app.description }}<br>
+                                <strong>Granted Date:</strong> {{ allowed_app.granted_date }}<br>
+                                <form class="revoke-form" data-appid="{{ allowed_app.app.id }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="delete-btn">Revoke Access</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No allowed apps found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const expandBtns = document.querySelectorAll('.expand-btn');
+
+    expandBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const info = btn.nextElementSibling;
+            info.classList.toggle('show');
+            if (info.classList.contains('show')) {
+                btn.textContent = 'Hide Info';
+            } else {
+                btn.textContent = 'Show Info';
+            }
+        });
+    });
+
+    const revokeButtons = document.querySelectorAll('.delete-btn');
+
+    revokeButtons.forEach(btn => {
+        btn.addEventListener('click', event => {
+            event.preventDefault();
+            const form = btn.parentNode;
+            const appid = form.getAttribute('data-appid');
+            fetch(window.location.pathname + '?appid=' + appid, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Failed to revoke access');
+                }
+            })
+            .catch(error => {
+                console.error('Error revoking access:', error);
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>

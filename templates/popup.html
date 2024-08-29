@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Popup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .popup-container {
+            width: 80%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .popup-title {
+            color: #eee;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .popup-description {
+            color: #ccc;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .accept-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .accept-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    {% if popup %}
+        <div class="popup-container">
+            <h1 class="popup-title">{{ popup.popup.title }}</h1>
+            <p class="popup-description">{{ popup.popup.description }}</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="accept-button">Accept</button>
+            </form>
+        </div>
+    {% else %}
+        <p>No popup available</p>
+    {% endif %}
+</body>
+</html>

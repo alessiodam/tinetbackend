@@ -1,0 +1,20 @@
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Chat - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="chat-container">
+  <h3>This is still in development, this will be a Matrix client.</h3>
+  <div class="messages" id="messages"></div>
+  <form class="input-form" id="messageForm">
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button type="submit" id="sendButton">Send</button>
+  </form>
+</div>
+</body>
+</html>

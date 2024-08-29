@@ -1,0 +1,45 @@
+<nav>
+    <a href="{% url 'index' %}" class="navbar-brand">TINET {{ TINET_VERSION }}</a>
+    <ul>
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Help pay server electricity', '#29abe0', 'G2G41085H5');kofiwidget2.draw();</script>
+        <li><a href="/privacy-policy" target="_blank">Privacy Policy</a></li>
+        <li class="dropdown">
+            <a href="#" class="dropbtn">Resources</a>
+            <div class="dropdown-content">
+                <a href="https://tinetdocs.tkbstudios.com/" target="_blank">Docs</a>
+                <a href="https://tinet.tkbstudios.com/swagger/" target="_blank">API Docs</a>
+                <a href="https://www.cemetech.net/forum/viewtopic.php?p=305677" target="_blank">Cemetech topic</a>
+            </div>
+        </li>
+        <li class="dropdown">
+            <a href="#" class="dropbtn">Experiments</a>
+            <div class="dropdown-content">
+                <a href="{% url 'experiments' %}" target="_blank">Manage</a>
+                <a href="{% url 'app_api_keys' %}" target="_blank">App API Keys</a>
+                <a href="{% url 'leaderboards' %}" target="_blank">Leaderboards</a>
+                <a href="{% url 'files' %}" target="_blank">Files</a>
+            </div>
+        </li>
+        <li class="dropdown">
+            <a href="#" class="dropbtn">Services</a>
+            <div class="dropdown-content">
+                <a href="{% url 'netchat' %}" target="_blank">NETCHAT</a>
+            </div>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="dropdown">
+                <a href="#" class="dropbtn">{{ user.username }}</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    {% if request.user.is_staff %}<a href="/admin" target="_blank">Admin</a>{% endif %}
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                </div>
+            </li>
+        {% else %}
+            <li><a href="{% url 'login' %}">Log In</a></li>
+        {% endif %}
+    </ul>
+</nav>

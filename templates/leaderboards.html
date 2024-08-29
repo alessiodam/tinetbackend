@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Leaderboards - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/leaderboards.css' %}">
+</head>
+<body>
+    {% include 'components/navbar.html' %}
+    <h1>Leaderboards</h1>
+    <div class="leaderboard-list">
+        {% for leaderboard in leaderboards %}
+            <div class="leaderboard-item">
+                <h2>{{ leaderboard.title }}</h2>
+                <p>{{ leaderboard.description }}</p>
+                <a href="{% url 'leaderboard_detail' leaderboard.id %}">View Details</a>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

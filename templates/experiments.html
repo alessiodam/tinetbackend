@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Experiments - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/experiments.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="container">
+    <h1>Choose Experiment</h1>
+    <h4 style="color: red;">Experiments are BETA, they might break on your side</h4>
+    <h4 style="color: red;">Enable if you really want to try things out or if you know what you're doing</h4>
+    <form id="experimentForm">
+        {% csrf_token %}
+        <button type="button" id="saveButton">Save</button>
+        <p></p>
+        <div class="flags-container">
+            {% for flag in flags %}
+                <div class="flag-item">
+                    <input type="checkbox" id="{{ flag.name }}" name="flags[]" value="{{ flag.name }}" {% if flag.name in enabled_flags %}checked{% endif %}>
+                    <label for="{{ flag.name }}">{{ flag.name }}</label>
+                    <div class="flag-info">
+                        <span>Status: <span class="flag-status">{% if flag.name in enabled_flags %}Enabled{% else %}Disabled{% endif %}</span></span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function saveData() {
+            var dataToSend = {};
+            var checkboxes = document.querySelectorAll('.flag-item input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                var flagName = checkbox.id;
+                var flagStatus = checkbox.checked ? 'Enabled' : 'Disabled';
+                dataToSend[flagName] = flagStatus;
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{% url "experiments" %}', true);
+            xhr.setRequestHeader('Content-Type', 'application/; charset=utf-8');
+            xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token }}");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        location.reload();
+                    } else {
+                        console.error(xhr.status + ": " + xhr.responseText);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(dataToSend));
+        }
+
+        var saveButton = document.getElementById('saveButton');
+        saveButton.addEventListener('click', saveData);
+
+        function updateFlagStatus() {
+            var flagName = this.id;
+            var flagStatus = this.checked ? 'Enabled' : 'Disabled';
+            var flagStatusElement = document.getElementById(flagName + 'Status');
+            if (flagStatusElement) {
+                flagStatusElement.textContent = flagStatus;
+            }
+        }
+
+        var checkboxes = document.querySelectorAll('.flag-item input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', updateFlagStatus);
+        });
+    });
+</script>
+</body>
+</html>

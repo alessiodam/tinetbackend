@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Access Request - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account/app_request_access.css' %}">
+    <script>
+        function requestAccess() {
+            var password = document.getElementById("password").value;
+            if (password !== "") {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            alert("Access granted!");
+                            window.location.replace("{% url 'allowed_apps' %}");
+                        } else {
+                            alert("Access denied. Please try again.");
+                        }
+                    }
+                };
+                xhr.open("POST", "{% url 'oauth_request' %}?appid={{ app_id }}", true);
+                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.send(JSON.stringify({ password: password }));
+            } else {
+                alert("Password cannot be empty.");
+            }
+        }
+    </script>
+</head>
+<body>
+    {% include 'components/navbar.html' %}
+    <div class="access-request-container">
+        <h2>Access Request for {{ app_name }}</h2>
+        <p>{{ app_description }}</p>
+        <p>Please confirm your identity by providing your password:</p>
+        <input type="password" id="password" placeholder="Enter your password">
+        <button onclick="requestAccess()">Allow Access</button><br>
+        <p style="color: red;">Allowing this app to access your account will give this app read access to your user ID, username, email, bio and other public information.</p>
+    </div>
+</body>
+</html>

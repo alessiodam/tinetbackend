@@ -1,0 +1,20 @@
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>NETCHAT - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/netchat.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="container">
+    <div class="product-info text-center">
+        <h1>NETCHAT</h1>
+        <p class="description">NETCHAT is a chat service for your calculator. Connect with friends, share messages, and stay connected wherever you go.</p>
+        <a href="/chat" class="btn-get-started">Bridged Web Chat</a>
+        <a href="https://tinetdocs.tkbstudios.com/docs/installation" class="btn-get-started">Get Started</a>
+    </div>
+</div>
+</body>
+</html>

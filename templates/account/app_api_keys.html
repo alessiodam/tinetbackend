@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>App API Keys - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account/app_api_keys.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="container">
+    <h1>Manage API Keys</h1>
+
+    <div class="row mt-4">
+        <form method="post" action="{% url 'app_api_keys' %}">
+            {% csrf_token %}
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required><br>
+            <button type="submit">Create API Key</button>
+        </form>
+        <div class="col-md-6">
+            <h2>Your API Keys</h2>
+            {% if api_keys %}
+                <ul>
+                    {% for key in api_keys %}
+                        <li class="api-key-item">
+                            {{ key.name }}
+                            <button class="expand-btn">Show Info</button>
+                            <div class="api-key-info">
+                                <strong>App ID:</strong> {{ key.id }}<br><br>
+                                <strong>Name:</strong> {{ key.name }}<br><br>
+                                <strong>Description:</strong> {{ key.description }}<br><br>
+                                <strong>Key:</strong> <b class="apikey-key">{{ key.key }}</b><br><br>
+                                <strong>Expires:</strong> {{ key.expires }}<br><br>
+                                <strong>Last Used:</strong> {{ key.last_used }}<br><br>
+                                <strong>OAuth URL:</strong> <a href="https://tinet.tkbstudios.com/oauth/request?appid={{ key.id }}" target="_blank">https://tinet.tkbstudios.com/oauth/request?appid={{ key.id }}</a><br><br>
+                                <form id="revoke-form" data-key="{{ key.key }}">
+                                    <button type="submit" class="delete-btn">Revoke Key</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No API keys found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const expandBtns = document.querySelectorAll('.expand-btn');
+
+        expandBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const info = btn.nextElementSibling;
+                info.classList.toggle('show');
+                if (info.classList.contains('show')) {
+                    btn.textContent = 'Hide Info';
+                } else {
+                    btn.textContent = 'Show Info';
+                }
+            });
+        });
+
+        document.getElementById('revoke-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var key = this.getAttribute('data-key');
+            fetch(window.location.pathname + '?key=' + key, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': "{{ csrf_token }}"
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Failed to revoke API key');
+                }
+            })
+            .catch(error => {
+                console.error('Error revoking API key:', error);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

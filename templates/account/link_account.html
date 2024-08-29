@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Your Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h1, p {
+            text-align: center;
+        }
+
+        #loginForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .social-login-btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .social-login-btn:hover {
+            background-color: #45a049;
+        }
+
+        .banner-img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% load socialaccount %}
+    <h1>Account Linking Required</h1>
+    <p>To continue using TINET, linking your account is mandatory. Please link your account below.</p>
+    <p>TINET will be undergoing a major account system update soon, linking your account ensures for a faster process and makes sure your account doesn't get deleted due to inactivity/unlinked account</p>
+
+    <form id="loginForm" action="{% provider_login_url 'tkbstudios-auth' process='connect' %}" method="post">
+        {% csrf_token %}
+        <button type="button" onclick="submitForm()" class="social-login-btn">
+            Connect your account to TKB Studios Auth
+            <p><img src="https://raw.githubusercontent.com/tkbstudios/my-images/main/TKB%20Studios%20Banner.png" alt="TKB Studios" class="banner-img"></p>
+        </button>
+    </form>
+    <script>
+        function submitForm() {
+            document.getElementById("loginForm").submit();
+        }
+    </script>
+</body>
+</html>

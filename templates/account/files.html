@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Files - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account/files.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="file-manager">
+    <h2>File Manager</h2>
+    <h3>Current size: {{ current_bucket_size }}MB/32MB</h3>
+    <div class="file-list">
+        <ul id="file-list">Loading files...</ul>
+    </div>
+    <div class="file-actions">
+        <button id="uploadButton" onclick="uploadFiles()">Upload Files</button>
+        <button id="deleteButton" onclick="deleteSelectedFiles()">Delete Selected</button>
+        <div id="progressBar" style="display: none;">
+            <progress id="uploadProgress" value="0" max="100"></progress>
+            <span id="progressText">0%</span>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        refreshFileList();
+    });
+
+    function toggleButtons(disabled) {
+        document.getElementById('uploadButton').disabled = disabled;
+        document.getElementById('deleteButton').disabled = disabled;
+    }
+
+    function refreshFileList() {
+        fetch('/api/v1/user/files/list', {
+            headers: {
+                'X-CSRFToken': "{{ csrf_token }}"
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const fileListElement = document.getElementById('file-list');
+                fileListElement.innerHTML = '';
+                data.files.forEach(file => {
+                    const listItem = document.createElement('li');
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'file';
+                    checkbox.value = file;
+                    listItem.appendChild(checkbox);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.setAttribute('href', `/api/v1/user/files/download?filename=${file}`);
+                    downloadLink.setAttribute('target', '_blank');
+                    downloadLink.textContent = file;
+                    listItem.appendChild(downloadLink);
+
+                    fileListElement.appendChild(listItem);
+                    listItem.classList.add('new-file');
+                    setTimeout(() => {
+                        listItem.classList.remove('new-file');
+                    }, 500);
+                });
+            })
+            .catch(error => console.error('Error fetching file list:', error));
+    }
+
+    function uploadFiles() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.multiple = true;
+        fileInput.onchange = function () {
+            const files = Array.from(fileInput.files);
+            files.forEach(file => {
+                if (file.size > 32 * 1024 * 1024) {
+                    alert(`Error: File "${file.name}" size exceeds 32MB limit.`);
+                    return;
+                }
+            });
+
+            const formData = new FormData();
+            files.forEach(file => formData.append('files', file));
+
+            toggleButtons(true);
+            document.getElementById('progressBar').style.display = 'block';
+
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function (event) {
+                const progress = Math.round((event.loaded / event.total) * 100);
+                document.getElementById('uploadProgress').value = progress;
+                document.getElementById('progressText').innerText = `${progress}%`;
+            });
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText);
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            refreshFileList();
+                        } else {
+                            alert(data.message);
+                        }
+                        location.reload();
+                    } else {
+                        const errorData = JSON.parse(xhr.responseText);
+                        if (errorData.message) {
+                            alert(errorData.message);
+                        } else {
+                            alert('Error uploading file. Please try again.');
+                        }
+                        location.reload();
+                    }
+                    toggleButtons(false);
+                    document.getElementById('progressBar').style.display = 'none';
+                }
+            };
+
+            xhr.open('POST', '/api/v1/user/files/upload');
+            xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token }}");
+            xhr.send(formData);
+        };
+        fileInput.click();
+    }
+
+    function deleteSelectedFiles() {
+        const selectedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(checkbox => checkbox.value);
+        if (selectedFiles.length === 0) {
+            alert('No files selected for deletion.');
+            return;
+        }
+        const confirmation = confirm(`Are you sure you want to delete ${selectedFiles.length} file(s)?`);
+        if (!confirmation) {
+            return;
+        }
+
+        toggleButtons(true);
+
+        fetch('/api/v1/user/files/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token }}"
+            },
+            body: JSON.stringify({filenames: selectedFiles})
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.success) {
+                    refreshFileList();
+                } else {
+                    alert('Error deleting files. Please try again.');
+                }
+                location.reload();
+            })
+            .catch(error => console.error('Error deleting files:', error))
+            .finally(() => toggleButtons(false));
+
+        selectedFiles.forEach(filename => {
+            const listItem = document.querySelector(`li:contains('${filename}')`);
+            if (listItem) {
+                listItem.classList.add('deleted-file');
+                setTimeout(() => {
+                    listItem.remove();
+                }, 500);
+            }
+        });
+    }
+</script>
+</body>
+</html>

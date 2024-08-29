@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Login - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/account/login.css' %}">
+</head>
+<body>
+{% load socialaccount %}
+{% include 'components/navbar.html' %}
+<style>
+
+</style>
+<h1>Login</h1>
+<center><h3 style="color: red;"><b>If you haven't merged your account, create a new one with the button below</b></h3></center>
+<center>
+    <form id="tkbauthLoginForm" action="{% provider_login_url 'tkbstudios-auth' %}" method="post">
+        {% csrf_token %}
+        <button type="button" onclick="submitForm()" class="social-login-btn">
+            Sign in with<br>
+            <img src="https://raw.githubusercontent.com/tkbstudios/my-images/main/TKB%20Studios%20Banner.png" alt="TKB Studios" class="banner-img">
+        </button>
+    </form>
+    <div style="text-align: center;">
+        By logging in, you agree to the following:<br>
+        - <a href="/privacy-policy" target="_blank">Privacy Policy</a><br>
+        - <a href="/terms-of-service" target="_blank">Terms Of Service</a><br>
+    </div>
+</center>
+<script>
+    function submitForm() {
+        document.getElementById("tkbauthLoginForm").submit();
+    }
+</script>
+</body>
+</html>

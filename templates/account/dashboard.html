@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+{% load waffle_tags %}
+<html lang="en">
+<head>
+    {% include 'components/base_headers.html' %}
+    <title>Dashboard - TINET</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+{% include 'components/navbar.html' %}
+<div class="dashboard-container">
+    <div class="dashboard-left">
+        <h1>Welcome to the TINET Dashboard, {{ user.username }}!</h1>
+
+        {% if messages %}
+            <div class="alert alert-success">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="user-info">
+            <h2>User Information:</h2>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+
+            {% flag "dashboard_edit_bio" %}
+                <form method="POST" id="bio-form" action="{% url 'api_user_edit_bio' %}">
+                    {% csrf_token %}
+                    <label for="bio">Bio:</label><br>
+                    <textarea name="bio" id="bio" rows="4" cols="50">{{ user.bio }}</textarea><br>
+                    <button type="submit">Save</button>
+                </form>
+            {% else %}
+                <p><strong>Bio:</strong> {{ user.bio }}</p>
+            {% endflag %}
+
+            {% flag "recording_mode" %}
+                <p><strong>Email:</strong> [Hidden]</p>
+            {% else %}
+                <p><strong>Email:</strong> {{ user.email }}</p>
+            {% endflag %}
+
+            <p><strong>Registration Date:</strong> {{ user.date_joined }}</p>
+            <p><strong><a href="https://tinet.tkbstudios.com/api/v1/user/keyfile/download" target="_blank" class="download-kf-button">Download keyfile (will expire old one)</a></strong></p><br>
+        </div>
+        <div>
+            <form action="{% url 'change_password' %}" method="GET" target="_blank">
+                <button type="submit" class="btn red-btn">Change Password</button>
+            </form>
+            <button onclick="refreshApiKey()" class="btn red-btn">Refresh API key</button>
+            <button onclick="expireAllWebSessions()" class="btn red-btn">Logout From Everywhere</button>
+            <button onclick="expireAllCalcSessions()" class="btn red-btn">Expire All Calc Sessions</button>
+            <button onclick="confirmDelete()" class="btn red-btn">Delete Account</button>
+            <form id="delete-form" action="{% url 'delete_account' %}" method="post" style="display: none;">
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <div class="dashboard-right">
+        <h3>Your Events:</h3>
+        <ul class="event-list">
+            {% for event in user_events %}
+                <li class="event-list-item">{{ event.action }} - {% flag "recording_mode" %}[Hidden]{% else %}{{ event.ip }}{% endflag %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<script>
+    const csrftoken = "{{ csrf_token }}";
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var bioForm = document.getElementById('bio-form');
+    if (bioForm) {
+        bioForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(bioForm);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{% url "api_user_edit_bio" %}', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        document.getElementById('bio').value = response.new_bio;
+                        location.reload();
+                    } else {
+                        console.error(xhr.responseText);
+                        alert('Error: ' + xhr.responseText);
+                    }
+                }
+            };
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send(formData);
+        });
+    }
+});
+</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>
